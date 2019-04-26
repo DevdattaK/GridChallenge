@@ -91,9 +91,11 @@ public class App {
       tempProd = 1L;
       for (int j = col; j < col + length; j++) {
         if (curDirection == direction.HORIZONTAL) {
-          tempProd *= grid[i][j];
+          //tempProd *= grid[i][j];
+          tempProd = Math.multiplyExact(tempProd, grid[i][j]);
         } else {
-          tempProd *= grid[j][i];
+          //tempProd *= grid[j][i];
+          tempProd = Math.multiplyExact(tempProd, grid[j][i]);
         }
       }
       curList.add(tempProd);
@@ -142,13 +144,15 @@ public class App {
      */
     tempProd = 1L;
     for (int i = row, j = col; i < row + length && j < col + length; i++, j++) {
-      tempProd *= grid[i][j];
+      //tempProd *= grid[i][j];
+      tempProd = Math.multiplyExact(tempProd, grid[i][j]);
     }
     maxProductForSubGrid = tempProd > maxProductForSubGrid ? tempProd : maxProductForSubGrid;
 
     tempProd = 1L;
     for (int i = row + length - 1, j = col; i >= 0 && j < col + length; i--, j++) {
-      tempProd *= grid[i][j];
+      //tempProd *= grid[i][j];
+      tempProd = Math.multiplyExact(tempProd, grid[i][j]);
     }
     maxProductForSubGrid = tempProd > maxProductForSubGrid ? tempProd : maxProductForSubGrid;
 
@@ -188,11 +192,13 @@ public class App {
      */
     if (curDirection == direction.HORIZONTAL) {
       for (int j = col; j < col + length; j++) {
-        remainingEntityTypeProduct *= grid[row + length - 1][j];
+        //remainingEntityTypeProduct *= grid[row + length - 1][j];
+        remainingEntityTypeProduct = Math.multiplyExact(remainingEntityTypeProduct, grid[row + length - 1][j]);
       }
     } else {
       for (int i = row; i < row + length; i++) {
-        remainingEntityTypeProduct *= grid[i][col + length - 1];
+        //remainingEntityTypeProduct *= grid[i][col + length - 1];
+        remainingEntityTypeProduct = Math.multiplyExact(remainingEntityTypeProduct, grid[i][col + length - 1]);
       }
     }
     curProducts.add(remainingEntityTypeProduct);
@@ -209,7 +215,20 @@ public class App {
   }
 
 
-  private long getMaxProductUsingPrevMapAndNewElements(int row, int col, int length, int[][] grid, Map<direction, Queue<Long>> prevMap,
+  /**
+   * ------------- NO MORE USED. ------------. ArithmaticException is also not handled for the same reason.
+   * @param row
+   * @param col
+   * @param length
+   * @param grid
+   * @param prevMap
+   * @param tabularProductMap
+   * @param curDirection
+   * @param prevCol
+   * @param prevRow
+   * @return
+   */
+  private long getMaxProductUsingPrevMapAndNewElements_DEPRECATED(int row, int col, int length, int[][] grid, Map<direction, Queue<Long>> prevMap,
       Map<Pair<Integer, Integer>, Map<direction, Queue<Long>>> tabularProductMap,
       direction curDirection, int prevCol, int prevRow) {
 
@@ -262,7 +281,7 @@ public class App {
         curMaxProd = this.getMaxProductUsingPrevMap(row, col, length, grid, prevMap, tabularProductMap, curDirection);
       } else {
         /*prevMap = tabularProductMap.get(keyForVertical);
-        curMaxProd = this.getMaxProductUsingPrevMapAndNewElements(row, col, length, grid, prevMap, tabularProductMap, curDirection, prevCol, prevRow);*/
+        curMaxProd = this.getMaxProductUsingPrevMapAndNewElements_DEPRECATED(row, col, length, grid, prevMap, tabularProductMap, curDirection, prevCol, prevRow);*/
       }
     } else {
       if (tabularProductMap.containsKey(keyForVertical)) {
@@ -270,7 +289,7 @@ public class App {
         curMaxProd = this.getMaxProductUsingPrevMap(row, col, length, grid, prevMap, tabularProductMap, curDirection);
       } else {
         /*prevMap = tabularProductMap.get(keyForHorizontal);
-        curMaxProd = this.getMaxProductUsingPrevMapAndNewElements(row, col, length, grid, prevMap, tabularProductMap, curDirection, prevCol, prevRow);*/
+        curMaxProd = this.getMaxProductUsingPrevMapAndNewElements_DEPRECATED(row, col, length, grid, prevMap, tabularProductMap, curDirection, prevCol, prevRow);*/
       }
     }
 
@@ -282,9 +301,9 @@ public class App {
    *
    * @param grid
    * @param length
-   * @return
+   * @return maxProduct
    */
-  public long getProduct(int[][] grid, int length) throws InputException {
+  public long getProduct(int[][] grid, int length) throws InputException, ArithmeticException {
     int row = 0, col = 0, limit = grid.length - length;
     long result = Long.MIN_VALUE;
     long maxProductForCurSubGrid;
@@ -308,11 +327,6 @@ public class App {
             break;
           } else {
             maxProductForCurSubGrid = this.fillMapWithProductsOfSubgridElementsAndGetMaxFromCurSubgrid(row, col, length, grid, tabularProductMap);
-
-            /*if(maxProductForCurSubGrid == 667755){
-              System.out.println("Track (x,y) coordinates.");
-            }*/
-
 
             result = maxProductForCurSubGrid > result ? maxProductForCurSubGrid : result;
 

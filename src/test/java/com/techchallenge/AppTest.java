@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.exception.InputException;
-import jdk.nashorn.internal.runtime.ECMAException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -119,25 +118,38 @@ public class AppTest {
   }
 
   @Test
-  public void whenGivenAllMinInts_ReturnComputedValue() throws Exception{
+  public void whenGivenAllMinIntsToCauseOverflow_ExceptionIsThrown() throws Exception {
     final int minInt = Integer.MIN_VALUE;
-    int[][] arr = {{minInt, minInt, minInt, minInt}, {minInt, minInt, minInt, minInt}, {minInt, minInt, minInt, minInt}, {minInt, minInt, minInt, minInt}};
-    long result = obj.getProduct(arr, 4);
-    assertEquals(336, result);
+    int[][] arr = {{minInt, minInt, minInt, minInt}, {minInt, minInt, minInt, minInt}, {minInt, minInt, minInt, minInt},
+        {minInt, minInt, minInt, minInt}};
+    long result = 1L;
+    Exception arithException = null;
+
+    try {
+      result = obj.getProduct(arr, 4);
+    } catch (ArithmeticException e) {
+      arithException = e;
+    } finally {
+      if (arithException == null) {
+        assertTrue(false);
+      }
+    }
+
+    assertEquals(arithException.getClass(), ArithmeticException.class);
   }
 
   @Test
   public void whenGivenTestDataProvidedInQuestionWithTenByTenGrid_ReturnComputedValue() throws Exception {
     int[][] arr = {{8, 2, 22, 97, 38, 15, 0, 40, 0, 75},
-                    {49, 49, 99, 40, 17, 81, 18, 57, 60, 87},
-                    {81, 49, 31, 73, 55, 79, 14, 29, 93, 71},
-                    {52, 70, 95, 23, 4, 60, 11, 42, 69, 24},
-                    {22, 31, 16, 71, 51, 67, 63, 89, 41, 92},
-                    {24, 47, 32, 60, 99, 3, 45, 2, 44, 75},
-                    {32, 98, 81, 28, 64, 23, 67, 10, 26, 38},
-                    {67, 26, 20, 68, 2, 62, 12, 20, 95, 63},
-                    {24, 55, 58, 5, 66, 73, 99, 26, 97, 17},
-                    {21, 36, 23, 9, 75, 0, 76, 44, 20, 45}};
+        {49, 49, 99, 40, 17, 81, 18, 57, 60, 87},
+        {81, 49, 31, 73, 55, 79, 14, 29, 93, 71},
+        {52, 70, 95, 23, 4, 60, 11, 42, 69, 24},
+        {22, 31, 16, 71, 51, 67, 63, 89, 41, 92},
+        {24, 47, 32, 60, 99, 3, 45, 2, 44, 75},
+        {32, 98, 81, 28, 64, 23, 67, 10, 26, 38},
+        {67, 26, 20, 68, 2, 62, 12, 20, 95, 63},
+        {24, 55, 58, 5, 66, 73, 99, 26, 97, 17},
+        {21, 36, 23, 9, 75, 0, 76, 44, 20, 45}};
     long result = obj.getProduct(arr, 3);
     assertEquals(667755, result);
   }
