@@ -217,16 +217,6 @@ public class App {
 
   /**
    * ------------- NO MORE USED. ------------. ArithmaticException is also not handled for the same reason.
-   * @param row
-   * @param col
-   * @param length
-   * @param grid
-   * @param prevMap
-   * @param tabularProductMap
-   * @param curDirection
-   * @param prevCol
-   * @param prevRow
-   * @return
    */
   private long getMaxProductUsingPrevMapAndNewElements_DEPRECATED(int row, int col, int length, int[][] grid, Map<direction, Queue<Long>> prevMap,
       Map<Pair<Integer, Integer>, Map<direction, Queue<Long>>> tabularProductMap,
@@ -298,9 +288,6 @@ public class App {
 
 
   /**
-   *
-   * @param grid
-   * @param length
    * @return maxProduct
    */
   public long getProduct(int[][] grid, int length) throws InputException, ArithmeticException {
@@ -351,5 +338,6 @@ public class App {
    * @param args
    */
   public static void main(String[] args) {
+    System.out.println("Please call methods explictly with inputs of your choice.");
   }
 }

@@ -1,11 +1,14 @@
 package com.techchallenge;
 
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import com.exception.InputException;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 /**
  * Unit test for simple App.
@@ -14,14 +17,14 @@ public class AppTest {
 
   private App obj;
 
+  @Rule
+  public ExpectedException thrown = ExpectedException.none();
+
   @Before
   public void setUp() throws Exception {
     obj = App.getInstance();
   }
 
-  /**
-   * -ve test.
-   */
 
   @Test
   public void whenGivenInvalidLength_ThrowException() throws Exception {
@@ -31,21 +34,21 @@ public class AppTest {
   }
 
   @Test
-  public void whenGivenGridLengthSameAsLength_ReturnProductAsEight() throws Exception {
+  public void whenGivenGridLengthSameAsLength_ValidateCombinationsOfGridComponents() throws Exception {
     int[][] arr = {{1, 2, 3}, {2, 3, 4}, {3, 4, 5}};
     long result = obj.getTotalCombinations(arr, 3);
     assertEquals(8, result);
   }
 
   @Test
-  public void whenGivenGridSizeFourAndLength3_ComputeAndReturnTheProductAsTwentyEight() throws Exception {
+  public void whenGivenGridSizeIsFourAndLengthIsThree_ValidateCombinationsUsingSubgrids() throws Exception {
     int[][] arr = {{1, 2, 3, 4}, {2, 3, 4, 5}, {3, 4, 5, 6}, {6, 7, 8, 9}};
     long result = obj.getTotalCombinations(arr, 3);
     assertEquals(28, result);
   }
 
   @Test
-  public void whenGivenGridSizeSixAndLength4_ComputeAndReturnTheProductAsFiftyFour() throws Exception {
+  public void whenGivenGridSizeIsSixAndLengthIsFour_ValidateCombinationsUsingSubgrids() throws Exception {
     int[][] arr = {{1, 2, 3, 4, 5, 6}, {2, 3, 4, 5, 6, 7}, {3, 4, 5, 6, 7, 8}, {6, 7, 8, 9, 10, 11}, {12, 13, 14, 15, 16, 17},
         {14, 15, 16, 17, 18, 19}};
     long result = obj.getTotalCombinations(arr, 4);
@@ -53,7 +56,7 @@ public class AppTest {
   }
 
   @Test
-  public void whenGivenGridSizeTenAndLength3_ComputeAndReturnTheProductAsFourHundred() throws Exception {
+  public void whenGivenGridSizeIsTenAndLengthIsThree_ValidateCombinationsUsingSubgrids() throws Exception {
     int[][] arr = {{1, 2, 3, 4, 5, 6, 2, 3, 4, 5}, {2, 3, 4, 5, 6, 7, 3, 4, 5, 6}, {3, 4, 5, 6, 7, 8, 4, 5, 6, 7}, {6, 7, 8, 9, 10, 11, 7, 8, 9, 10},
         {12, 13, 14, 15, 16, 17, 13, 14, 15, 16},
         {14, 15, 16, 17, 18, 19, 20, 21, 22, 23}, {14, 15, 16, 17, 18, 19, 20, 21, 22, 23}, {14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
@@ -66,31 +69,27 @@ public class AppTest {
   @Test
   public void whenGivenGridWithSizeLessThanLength_ThrowInputValidationException() throws Exception {
     int[][] arr = {{1, 2, 0, 3}, {2, 3, 4, 0}, {3, 4, 5, 0}, {0, 7, 8, 9}};
-    Exception inputException = null;
-    try {
-      long result = obj.getProduct(arr, 5);
-    } catch (Exception e) {
-      inputException = e;
-    }
 
-    assertEquals(InputException.class, inputException.getClass());
+    thrown.expect(InputException.class);
+    thrown.expectMessage(startsWith("Invalid input"));
+    thrown.expectMessage("length provided is greater than grid dimension");
+
+    long result = obj.getProduct(arr, 5);
   }
 
   @Test
   public void whenGivenAsymmetricGrid_ThrowInputValidationException() throws Exception {
     int[][] arr = {{1, 2, 0}, {2, 3, 4}, {3, 4, 5}, {0, 7, 8}};
-    Exception inputException = null;
-    try {
-      long result = obj.getProduct(arr, 5);
-    } catch (Exception e) {
-      inputException = e;
-    }
 
-    assertEquals(InputException.class, inputException.getClass());
+    thrown.expect(InputException.class);
+    thrown.expectMessage(startsWith("Invalid input"));
+    thrown.expectMessage("not balanced or symmetric");
+
+    long result = obj.getProduct(arr, 2);
   }
 
   @Test
-  public void whenGivenGridWithSizeEqualToLength_TreatWholeGridAsOnlySubgrid() throws Exception {
+  public void whenGivenGridWithSizeEqualToLength_TreatWholeGridAsTheOnlySubgrid() throws Exception {
     int[][] arr = {{1, 2, 0, 3}, {2, 3, 4, 0}, {3, 4, 5, 0}, {0, 7, 8, 9}};
     long result = obj.getProduct(arr, 4);
     assertEquals(168, result);
@@ -122,20 +121,23 @@ public class AppTest {
     final int minInt = Integer.MIN_VALUE;
     int[][] arr = {{minInt, minInt, minInt, minInt}, {minInt, minInt, minInt, minInt}, {minInt, minInt, minInt, minInt},
         {minInt, minInt, minInt, minInt}};
-    long result = 1L;
-    Exception arithException = null;
 
-    try {
-      result = obj.getProduct(arr, 4);
-    } catch (ArithmeticException e) {
-      arithException = e;
-    } finally {
-      if (arithException == null) {
-        assertTrue(false);
-      }
-    }
+    thrown.expect(ArithmeticException.class);
+    thrown.expectMessage("overflow");
 
-    assertEquals(arithException.getClass(), ArithmeticException.class);
+    long result = obj.getProduct(arr, 4);
+  }
+
+  @Test
+  public void whenGivenAllMaxIntsToCauseOverflow_ExceptionIsThrown() throws Exception {
+    final int maxInt = Integer.MAX_VALUE;
+    int[][] arr = {{maxInt, maxInt, maxInt, maxInt}, {maxInt, maxInt, maxInt, maxInt}, {maxInt, maxInt, maxInt, maxInt},
+        {maxInt, maxInt, maxInt, maxInt}};
+
+    thrown.expect(ArithmeticException.class);
+    thrown.expectMessage("overflow");
+
+    long result = obj.getProduct(arr, 4);
   }
 
   @Test
@@ -152,6 +154,23 @@ public class AppTest {
         {21, 36, 23, 9, 75, 0, 76, 44, 20, 45}};
     long result = obj.getProduct(arr, 3);
     assertEquals(667755, result);
+  }
+
+
+  @Test
+  public void whenGivenTestDataSufficentlyLargeWithTenByTenGrid_ReturnComputedValue() throws Exception {
+    int[][] arr = {{558, 552, 5522, 5597, 5538, 5515, 0, 5540, 0, 5575},
+        {5549, 5549, 5599, 5540, 5517, 5581, 5518, 5557, 5560, 5587},
+        {5581, 5549, 5531, 5573, 5555, 5579, 5514, 5529, 5593, 5571},
+        {5552, 5570, 5595, 5523, 554, 5560, 5511, 5542, 5569, 5524},
+        {5522, 5531, 5516, 5571, 5551, 5567, 5563, 5589, 5541, 5592},
+        {5524, 5547, 5532, 5560, 5599, 553, 5545, 552, 5544, 5575},
+        {5532, 5598, 5581, 5528, 5564, 5523, 5567, 5510, 5526, 5538},
+        {5567, 5526, 5520, 5568, 552, 5562, 5512, 5520, 5595, 5563},
+        {5524, 5555, 5558, 555, 5566, 5573, 5599, 5526, 5597, 5517},
+        {5521, 5536, 5523, 559, 5575, 550, 5576, 5544, 5520, 5545}};
+    long result = obj.getProduct(arr, 3);
+    assertEquals(174519402255L, result);
   }
 
 }
