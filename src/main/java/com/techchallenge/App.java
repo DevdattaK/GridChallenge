@@ -49,28 +49,36 @@ public class App {
      * if grid is not K x K dimension, then return -1.
      * if length is greater than grid length, return -1.
      */
+    if(grid.length == 0)
+      return -1;
+
     if (grid.length == grid[0].length) {
       if (grid.length < length) {
         return -1L;
       } else if (grid.length == length) {
         /**
          * There are total (2K + 2) combinations in any given grid of size K x K. K rows + K columns + 2 diagonals.
-         * there are exactly 8 combinations.
          */
-        return 8L;
+        return (2 * length) + 2;
       } else {
-        final long combinationsForNewGrid = 8L;
         /**
-         * we will split the grid into smaller grids, each of size length X length. For 1st sub-grid which starts at x=0, y=0; there will be 8 combinations.
-         * For second grid which starts at x=0, y=1, there will be [8 - (length-1)] combination e.g. when length = 3 and x=0, y=1; first two colums of this subGrid
-         * are already counted while computing combinations for previous subGrid i.e. column 1 and column 2.
-         * On similar lines, we can compute the total combinations for all grids by below formula.
+         * for every row, there would be (gridSize - length + 1) combination. Same for column.
+         * there would be (gridSize - length + 1) combinations for each longest diagonal.
+         * On each side of this longest diagonal, there will be smaller diagonals of size >= length && < longestDiagonalSize. Same for other longest diagonal
          */
+        long horizontalCombinations = grid.length * (grid.length - length + 1);
+        long verticalCombinations = horizontalCombinations;
+        long longestDiagonalCombination = (grid.length - length + 1);
+        /**
+         * arithmatic progression. Grid is 5x5 and length is 3.
+         * Longest diagonal size is 5, forming total 3 combinations. On upper side, next smaller diagonal size would be 4, forming 2 combinations.
+         * Next diagonal will be of size 3, forming the only combination. i.e. 3 + 2 + 1. Arithmatic progression. Since longest diagonal (from topRight to bottomLeft direction) is only one,
+         * we start the progression from n = horizontalCombinations-1 for calculating total diagonal combinations in partition above the diagonal.
+         * Some for the other side of this longest diagonal (i.e. portion below diagonal). Repeat this for other diagonal.
+         */
+        long totalCombinationsOnEitherSidesOfFirstLongestDiagonal = (longestDiagonalCombination - 1) * (longestDiagonalCombination) * 2;
 
-        long horizontalSubGrids = (grid.length - length) + 1;
-        long verticalWindowCountForGridTraversal = (grid.length - length) + 1;
-        long countForOneHorizontalSlidingWindow = combinationsForNewGrid + ((horizontalSubGrids - 1) * (8 - length + 1));
-        return countForOneHorizontalSlidingWindow * verticalWindowCountForGridTraversal;
+        return (horizontalCombinations + verticalCombinations + (longestDiagonalCombination * 2) + totalCombinationsOnEitherSidesOfFirstLongestDiagonal);
       }
     } else {
       //imbalanced grid.
@@ -295,6 +303,9 @@ public class App {
     long result = Long.MIN_VALUE;
     long maxProductForCurSubGrid;
     Map<Pair<Integer, Integer>, Map<direction, Queue<Long>>> tabularProductMap = new HashMap<>();
+
+    if(grid.length == 0)
+      throw new InputException("Invalid input => Grid is empty.");
 
     if (grid.length == grid[0].length) {
       if (grid.length < length) {

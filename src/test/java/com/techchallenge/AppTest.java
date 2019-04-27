@@ -25,9 +25,15 @@ public class AppTest {
     obj = App.getInstance();
   }
 
+  @Test
+  public void whenGridIsEmpty_ReturnInvalidCombinations() throws Exception{
+    int[][] arr = {};
+    long result = obj.getTotalCombinations(arr, 2);
+    assertEquals(-1, result);
+  }
 
   @Test
-  public void whenGivenInvalidLength_ThrowException() throws Exception {
+  public void whenGivenInvalidLength_ReturnInvalidCombinations() throws Exception {
     int[][] arr = {{1}, {2}, {3}};
     long result = obj.getTotalCombinations(arr, 2);
     assertEquals(-1, result);
@@ -41,10 +47,17 @@ public class AppTest {
   }
 
   @Test
+  public void whenGivenGridSizeFourLengthIsFour_ValidateCombinationsOfGridComponents() throws Exception {
+    int[][] arr = {{1, 2, 3, 4}, {2, 3, 4, 5}, {3, 4, 5, 6}, {6, 7, 8, 9}};
+    long result = obj.getTotalCombinations(arr, 4);
+    assertEquals(10, result);
+  }
+
+  @Test
   public void whenGivenGridSizeIsFourAndLengthIsThree_ValidateCombinationsUsingSubgrids() throws Exception {
     int[][] arr = {{1, 2, 3, 4}, {2, 3, 4, 5}, {3, 4, 5, 6}, {6, 7, 8, 9}};
     long result = obj.getTotalCombinations(arr, 3);
-    assertEquals(28, result);
+    assertEquals(24, result);
   }
 
   @Test
@@ -63,7 +76,18 @@ public class AppTest {
         {14, 15, 16, 17, 18, 19, 20, 21, 22, 23},
         {14, 15, 16, 17, 18, 19, 20, 21, 22, 23}};
     long result = obj.getTotalCombinations(arr, 3);
-    assertEquals(400, result);
+    assertEquals(288, result);
+  }
+
+  @Test
+  public void whenGivenEmptyGrid_ThrowInputValidationException() throws Exception{
+    int[][] arr = {};
+
+    thrown.expect(InputException.class);
+    thrown.expectMessage(startsWith("Invalid input"));
+    thrown.expectMessage("empty");
+
+    long result = obj.getProduct(arr, 5);
   }
 
   @Test
