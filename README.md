@@ -5,17 +5,15 @@
 
 * Method signatures provided were used as guidelines for implementation. For this reason, kept the return type as ``` long ``` and grid element type as ``` int ```, as provided in the problem statement. 
 * The term combination refers to mathematical combination i.e. order of elements do not matter and resulting collection is equivalent to Set<T>. This is also captured in 'Clarifications' section of the problem statement
+* Grid will always be symmetrical. i.e. KxK size. Any violation of this assumption will be handled as exception scenario.
 
 
 
 ## Solution Approach
 
 **1. Return total number of combinations**
- - divide a grid of KxK into sub-grid of length x length, if possible.
- - if elements of this sub-grid have never been taken into account during prior processing, then there are total (2*length + 2) unique combinations i.e. ```length```# rows + ```length```# columns + 2 diagonals.
- - if elements of this sub-grid have been taken into account during prior processing, then there will be ```length - 1``` combinations less than a fresh grid combinations. 
-      e.g. consider 4x4 grid with ```length=3```. First sub-grid starts at (0,0) and ends at (2,2) and will have 8 unique combinations. 
-      Second Subgrid starts at (0, 1) and ends at (2,3) and has 8 combinations (not-unique), out of which 2 combinations have been taken into account while processing sub-grid that starts at (0,0) i.e. column#1 and column#2.
+ - every row will have ```grid.length - length + 1``` unique combinations. Same for every column and longest diagonals of the grid.
+ - on each side of the diagonal, there may be diagonals of smaller length. The diagonals (one on each side) closest to the longest diagonal, will form total combinations = total combinations from longest diagonal minus one. This forms an arithmatic progression.
       Hence the formula.
       
 **2. Return maximum product of adjucent elements**
