@@ -73,7 +73,7 @@ public class App {
          * arithmatic progression. Grid is 5x5 and length is 3.
          * Longest diagonal size is 5, forming total 3 combinations. On upper side, next smaller diagonal size would be 4, forming 2 combinations.
          * Next diagonal will be of size 3, forming the only combination. i.e. 3 + 2 + 1. Arithmatic progression. Since longest diagonal (from topRight to bottomLeft direction) is only one,
-         * we start the progression from n = horizontalCombinations-1 for calculating total diagonal combinations in partition above the diagonal.
+         * we start the progression from n = longestDiagonalCombinations-1 for calculating total diagonal combinations in partition above the diagonal.
          * Some for the other side of this longest diagonal (i.e. portion below diagonal). Repeat this for other diagonal.
          */
         long totalCombinationsOnEitherSidesOfFirstLongestDiagonal = (longestDiagonalCombination - 1) * (longestDiagonalCombination) * 2;
