@@ -2,10 +2,8 @@ package com.techchallenge;
 
 
 import com.exception.InputException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import javafx.util.Pair;
@@ -45,44 +43,57 @@ public class App {
    * @return
    */
   public long getTotalCombinations(int[][] grid, int length) {
+    int rows = grid.length;
+    int columns = rows > 0 ? grid[0].length : 0;
+
     /**
      * if grid is not K x K dimension, then return -1.
      * if length is greater than grid length, return -1.
      */
-    if(grid.length == 0)
-      return -1;
-
-    if (grid.length == grid[0].length) {
-      if (grid.length < length) {
-        return -1L;
-      } else if (grid.length == length) {
-        /**
-         * There are total (2K + 2) combinations in any given grid of size K x K. K rows + K columns + 2 diagonals.
-         */
-        return (2 * length) + 2;
-      } else {
-        /**
-         * for every row, there would be (gridSize - length + 1) combination. Same for column.
-         * there would be (gridSize - length + 1) combinations for each longest diagonal.
-         * On each side of this longest diagonal, there will be smaller diagonals of size >= length && < longestDiagonalSize. Same for other longest diagonal
-         */
-        long horizontalCombinations = grid.length * (grid.length - length + 1);
-        long verticalCombinations = horizontalCombinations;
-        long longestDiagonalCombination = (grid.length - length + 1);
-        /**
-         * arithmatic progression. Grid is 5x5 and length is 3.
-         * Longest diagonal size is 5, forming total 3 combinations. On upper side, next smaller diagonal size would be 4, forming 2 combinations.
-         * Next diagonal will be of size 3, forming the only combination. i.e. 3 + 2 + 1. Arithmatic progression. Since longest diagonal (from topRight to bottomLeft direction) is only one,
-         * we start the progression from n = longestDiagonalCombinations-1 for calculating total diagonal combinations in partition above the diagonal.
-         * Some for the other side of this longest diagonal (i.e. portion below diagonal). Repeat this for other diagonal.
-         */
-        long totalCombinationsOnEitherSidesOfFirstLongestDiagonal = (longestDiagonalCombination - 1) * (longestDiagonalCombination) * 2;
-
-        return (horizontalCombinations + verticalCombinations + (longestDiagonalCombination * 2) + totalCombinationsOnEitherSidesOfFirstLongestDiagonal);
-      }
-    } else {
-      //imbalanced grid.
+    if (rows == 0 || columns == 0) {
       return -1L;
+    }
+    if (length == 1) {
+      return rows * columns;
+    }
+
+    if (rows < length && columns < length) {
+      return -1L;
+    } else if (rows == length && columns == length) {
+      /**
+       * There are total (2K + 2) combinations in any given grid of size K x K. K rows + K columns + 2 diagonals.
+       */
+      return (2 * length) + 2;
+    }
+    /**
+     * on any given dimension (row, col, diagonal), total combination = dimensionLength - length + 1.
+     */
+    else if (length > columns && length <= rows) {
+      //consider only rows. There will also be no diagonals.
+      return columns * (rows - length + 1);
+    } else if (length > rows && length <= columns) {
+      //consider only columns. There will also be no diagonals.
+      return rows * (columns - length + 1);
+    } else {
+      //asymmetric grid.
+      int max = rows > columns ? rows : columns;
+      int min = rows < columns ? rows : columns;
+
+      int totalNumberOfLongestDiagonals = max - min + 1;
+      int longestDiagonalLength = min;
+
+      long totalCombinationsOnLongestDiagonal = longestDiagonalLength - length + 1;
+      long combinationsFromLongestDiagonals = 2 * (totalCombinationsOnLongestDiagonal * totalNumberOfLongestDiagonals);
+      /**
+       * subOptimalLength diagonals are those whose length is equal to or greater than 'length', but less than longest diagonal.
+       * They too form unique combinations.
+       */
+      long combinationsFromSubOptimalLengthDiagonals = 2 * (totalCombinationsOnLongestDiagonal - 1) * totalCombinationsOnLongestDiagonal;
+
+      long totalRowCombinations = rows * (columns - length + 1);
+      long totalColumnCombinations = columns * (rows - length + 1);
+
+      return combinationsFromLongestDiagonals + totalRowCombinations + totalColumnCombinations + combinationsFromSubOptimalLengthDiagonals;
     }
 
   }
@@ -222,47 +233,6 @@ public class App {
     return tempMaxProd;
   }
 
-
-  /**
-   * ------------- NO MORE USED. ------------. ArithmaticException is also not handled for the same reason.
-   */
-  private long getMaxProductUsingPrevMapAndNewElements_DEPRECATED(int row, int col, int length, int[][] grid, Map<direction, Queue<Long>> prevMap,
-      Map<Pair<Integer, Integer>, Map<direction, Queue<Long>>> tabularProductMap,
-      direction curDirection, int prevCol, int prevRow) {
-
-    Queue<Long> prevProducts = null;
-    List<Long> prevProductList = new ArrayList<>(length);
-    Queue<Long> curProducts = new LinkedList();
-    long curProd = 1L, prevProd = 1L, curMaxProd = 1L;
-
-    prevProducts = prevMap.get(curDirection);
-    prevProductList.addAll(prevProducts);
-
-    if (curDirection == direction.HORIZONTAL) {
-      for (int i = row; i < row + length; i++) {
-        prevProd = prevProductList.remove(0);
-        curProd = prevProd / grid[i][prevCol] * grid[i][col + length - 1];
-        curProducts.add(curProd);
-      }
-    } else {
-      for (int j = col; j < col + length; j++) {
-        prevProd = prevProductList.remove(0);
-        curProd = prevProd / grid[prevRow][j] * grid[row + length - 1][j];
-        curProducts.add(curProd);
-      }
-    }
-
-    Pair<Integer, Integer> key = new Pair<>(row, col);
-    this.updateTabularMapForPair(key, tabularProductMap, curDirection, curProducts);
-
-    curMaxProd = curProducts.stream()
-                            .mapToLong(Long::longValue)
-                            .max()
-                            .orElse(Long.MIN_VALUE);
-
-    return curMaxProd;
-  }
-
   private long populateEntityFromPrebuiltEntitiesAndGetMaxProductForEntity(int row, int col, int length, int[][] grid,
       Map<Pair<Integer, Integer>, Map<direction, Queue<Long>>> tabularProductMap, direction curDirection) {
 
@@ -277,21 +247,52 @@ public class App {
       if (tabularProductMap.containsKey(keyForHorizontal)) {
         prevMap = tabularProductMap.get(keyForHorizontal);
         curMaxProd = this.getMaxProductUsingPrevMap(row, col, length, grid, prevMap, tabularProductMap, curDirection);
-      } else {
-        /*prevMap = tabularProductMap.get(keyForVertical);
-        curMaxProd = this.getMaxProductUsingPrevMapAndNewElements_DEPRECATED(row, col, length, grid, prevMap, tabularProductMap, curDirection, prevCol, prevRow);*/
       }
     } else {
       if (tabularProductMap.containsKey(keyForVertical)) {
         prevMap = tabularProductMap.get(keyForVertical);
         curMaxProd = this.getMaxProductUsingPrevMap(row, col, length, grid, prevMap, tabularProductMap, curDirection);
-      } else {
-        /*prevMap = tabularProductMap.get(keyForHorizontal);
-        curMaxProd = this.getMaxProductUsingPrevMapAndNewElements_DEPRECATED(row, col, length, grid, prevMap, tabularProductMap, curDirection, prevCol, prevRow);*/
       }
     }
 
     return curMaxProd;
+  }
+
+  private long getMaxProductFromTheDimension(final int[][] grid, final int length, final int minDimension, final int maxLimit,
+      final direction curDirection) {
+    long prevProduct = 1L;
+    long curProduct = 1L;
+    int counter;        //counter for unique combinations
+    long result = Long.MIN_VALUE;
+
+    for (int j = 0; j < minDimension; j++) {
+      for (int i = 0; i <= maxLimit; i++) {
+        counter = 0;
+        while (counter < length) {
+          if (curDirection == direction.VERTICAL) {
+            if (i > 0) {
+              curProduct = Math.multiplyExact(curProduct, prevProduct / grid[i - 1][j] * grid[i + length - 1][j]);
+              break;
+            } else {
+              curProduct = Math.multiplyExact(curProduct, grid[i + counter][j]);
+            }
+          } else {
+            if (i > 0) {
+              curProduct = Math.multiplyExact(curProduct, prevProduct / grid[j][i - 1] * grid[j][i + length - 1]);
+              break;
+            } else {
+              curProduct = Math.multiplyExact(curProduct, grid[j][i + counter]);
+            }
+          }
+          counter++;
+        }
+        prevProduct = curProduct;
+        result = curProduct > result ? curProduct : result;
+        curProduct = 1L;
+      }
+    }
+
+    return result;
   }
 
 
@@ -299,49 +300,56 @@ public class App {
    * @return maxProduct
    */
   public long getProduct(int[][] grid, int length) throws InputException, ArithmeticException {
-    int row = 0, col = 0, limit = grid.length - length;
+    int rows = grid.length;
+    int columns = rows > 0 ? grid[0].length : 0;
     long result = Long.MIN_VALUE;
     long maxProductForCurSubGrid;
     Map<Pair<Integer, Integer>, Map<direction, Queue<Long>>> tabularProductMap = new HashMap<>();
 
-    if(grid.length == 0)
+
+    if (rows == 0) {
       throw new InputException("Invalid input => Grid is empty.");
+    }
+    if (length > rows && length > columns) {
+      throw new InputException("Invalid input => Length is greater than both dimensions of grid.");
+    }
 
-    if (grid.length == grid[0].length) {
-      if (grid.length < length) {
-        //return -1L;
-        throw new InputException("Invalid input => length provided is greater than grid dimension.");
-      } else if (grid.length == length) {
-        /**
-         * No true SubGrids possible. Grid == the only SubGrid.
-         */
+    int row = 0, col = 0, rowLimit = rows - length, colLimit = columns - length;
 
-        maxProductForCurSubGrid = this.fillMapWithProductsOfSubgridElementsAndGetMaxFromCurSubgrid(row, col, length, grid, tabularProductMap);
 
-        return maxProductForCurSubGrid > result ? maxProductForCurSubGrid : result;
-      } else {
-        while (row <= limit && col <= limit) {
-          if (row > limit && col > limit) {
-            break;
-          } else {
-            maxProductForCurSubGrid = this.fillMapWithProductsOfSubgridElementsAndGetMaxFromCurSubgrid(row, col, length, grid, tabularProductMap);
+    if (rows == columns && columns == length) {
+      /**
+       * No additional SubGrids possible. Grid == the only SubGrid.
+       */
+      maxProductForCurSubGrid = this.fillMapWithProductsOfSubgridElementsAndGetMaxFromCurSubgrid(row, col, length, grid, tabularProductMap);
 
-            result = maxProductForCurSubGrid > result ? maxProductForCurSubGrid : result;
+      return maxProductForCurSubGrid > result ? maxProductForCurSubGrid : result;
+    } else if ((length > columns && length < rows) || (length > rows && length < columns)) {
+      //consider only possible dimension (row ExOR col). No diagonals possible.
+      int minDimension = rows < columns ? rows : columns;
+      int maxLimit = (rows < columns ? columns : rows) - length;
+      direction curDirection = length > columns ? direction.VERTICAL : direction.HORIZONTAL;
+      return this.getMaxProductFromTheDimension(grid, length, minDimension, maxLimit, curDirection);
+    } else {
+      while (row <= rowLimit && col <= colLimit) {
+        if (row > rowLimit && col > colLimit) {
+          break;
+        } else {
+          maxProductForCurSubGrid = this.fillMapWithProductsOfSubgridElementsAndGetMaxFromCurSubgrid(row, col, length, grid, tabularProductMap);
 
-            col++;
+          result = maxProductForCurSubGrid > result ? maxProductForCurSubGrid : result;
 
-            if (col > limit && row < limit) {
-              row++;
-              col = 0;
-            }
+          col++;
+
+          if (col > colLimit && row < rowLimit) {
+            row++;
+            col = 0;
           }
         }
-        return result;
       }
-    } else {
-      //imbalanced grid. Replace -1L with exception. -1 could be a valid max product.
-      throw new InputException("Invalid input => grid is not balanced or symmetric");
+      return result;
     }
+
   }
 
   /**

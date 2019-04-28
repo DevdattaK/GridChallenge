@@ -26,16 +26,76 @@ public class AppTest {
   }
 
   @Test
-  public void whenGridIsEmpty_ReturnInvalidCombinations() throws Exception{
+  public void whenGridIsEmpty_ReturnInvalidCombinations() throws Exception {
     int[][] arr = {};
     long result = obj.getTotalCombinations(arr, 2);
     assertEquals(-1, result);
   }
 
   @Test
-  public void whenGivenInvalidLength_ReturnInvalidCombinations() throws Exception {
-    int[][] arr = {{1}, {2}, {3}};
-    long result = obj.getTotalCombinations(arr, 2);
+  public void whenGivenLengthAsUnityWithEmptyGrid_ReturnInvalidCombinations() throws Exception {
+    int[][] arr = {};
+    long result = obj.getTotalCombinations(arr, 1);
+    assertEquals(-1, result);
+  }
+
+
+  @Test
+  public void whenGivenAsymmetricGridWith6Rows1ColumnLength3_ReturnColumnCombinations() throws Exception {
+    int[][] arr = {{1}, {502}, {97}, {49}, {986}, {15}};
+    long result = obj.getTotalCombinations(arr, 3);
+    assertEquals(4, result);
+  }
+
+  @Test
+  public void whenGivenAsymmetricGridWith1Row6ColumnLength3_ReturnRowCombinations() throws Exception {
+    int[][] arr = {{1, 502, 97, 49, 986, 15}};
+    long result = obj.getTotalCombinations(arr, 3);
+    assertEquals(4, result);
+  }
+
+  @Test
+  public void whenGivenLengthAsUnityWithValidGrid_ReturnTotalCellCount() throws Exception {
+    int[][] arr = {{1, 2, 3, 4}, {5, 6, 7, 8}};
+    long result = obj.getTotalCombinations(arr, 1);
+    assertEquals(8, result);
+  }
+
+  @Test
+  public void whenGivenUnityGridWithLengthAsUnity_ReturnUnity() throws Exception {
+    int[][] arr = {{1}};
+    long result = obj.getTotalCombinations(arr, 1);
+    assertEquals(1, result);
+  }
+
+  @Test
+  public void whenGivenAsymmetricGridWithColSizeLessThenLength_ReturnCombinationsAlongRow() throws Exception {
+    int[][] arr = {{1, 2, 3, 4}, {2, 3, 4, 5}};
+    long result = obj.getTotalCombinations(arr, 3);
+    assertEquals(4, result);
+  }
+
+
+  @Test
+  public void whenGivenAsymmetricGridWithColSize5RowSize4Length3_ReturnCombinationAsComputed() throws Exception {
+    int[][] arr = {{1, 2, 3, 4, 5}, {2, 3, 4, 5, 6}, {1, 2, 3, 4, 7}, {2, 3, 4, 5, 8}};
+    long result = obj.getTotalCombinations(arr, 3);
+    assertEquals(34, result);
+  }
+
+
+  @Test
+  public void whenGivenAsymmetricGridWithColSize6RowSize4Length3_ReturnCombinationAsComputed() throws Exception {
+    int[][] arr = {{1, 2, 3, 4, 5, 6}, {2, 3, 4, 5, 6, 7}, {1, 2, 3, 4, 7, 8}, {2, 3, 4, 5, 8, 9}};
+    long result = obj.getTotalCombinations(arr, 3);
+    assertEquals(44, result);
+  }
+
+
+  @Test
+  public void whenGivenGridWithSizeLessThanLength_ReturnCombinationsAlongRow() throws Exception {
+    int[][] arr = {{1, 2}, {2, 3}};
+    long result = obj.getTotalCombinations(arr, 3);
     assertEquals(-1, result);
   }
 
@@ -79,38 +139,49 @@ public class AppTest {
     assertEquals(288, result);
   }
 
+
+  /**
+   * Unit tests for problem#2.
+   */
+
   @Test
-  public void whenGivenEmptyGrid_ThrowInputValidationException() throws Exception{
+  public void whenGivenEmptyGrid_ThrowInputValidationException() throws Exception {
     int[][] arr = {};
 
     thrown.expect(InputException.class);
     thrown.expectMessage(startsWith("Invalid input"));
-    thrown.expectMessage("empty");
+    thrown.expectMessage("Grid is empty");
+
+    long result = obj.getProduct(arr, 5);
+  }
+
+
+  @Test
+  public void whenGivenAsymmetricGridLengthGreaterThanBothDimensions_ThrowInputValidationException() throws Exception {
+    int[][] arr = {{1, 2}, {2, 3}, {3, 4}, {0, 7}};
+
+    thrown.expect(InputException.class);
+    thrown.expectMessage(startsWith("Invalid input"));
+    thrown.expectMessage("Length is greater than both dimensions");
 
     long result = obj.getProduct(arr, 5);
   }
 
   @Test
-  public void whenGivenGridWithSizeLessThanLength_ThrowInputValidationException() throws Exception {
-    int[][] arr = {{1, 2, 0, 3}, {2, 3, 4, 0}, {3, 4, 5, 0}, {0, 7, 8, 9}};
-
-    thrown.expect(InputException.class);
-    thrown.expectMessage(startsWith("Invalid input"));
-    thrown.expectMessage("length provided is greater than grid dimension");
-
-    long result = obj.getProduct(arr, 5);
+  public void whenGivenAsymmetricGridWithColumnsLessThanLength_ProvideMaxProductOnColumns() throws Exception {
+    int[][] arr = {{1, 2}, {2, 3}, {3, 4}, {0, 7}};
+    long result = obj.getProduct(arr, 3);
+    assertEquals(84, result);
   }
 
   @Test
-  public void whenGivenAsymmetricGrid_ThrowInputValidationException() throws Exception {
-    int[][] arr = {{1, 2, 0}, {2, 3, 4}, {3, 4, 5}, {0, 7, 8}};
-
-    thrown.expect(InputException.class);
-    thrown.expectMessage(startsWith("Invalid input"));
-    thrown.expectMessage("not balanced or symmetric");
-
-    long result = obj.getProduct(arr, 2);
+  public void whenGivenAsymmetricGridWithRowsLessThanLength_ProvideMaxProductOnRows() throws Exception {
+    int[][] arr = {{1, 2, 3, 4, -1}, {5, 6, 7, 8, 0}};
+    long result = obj.getProduct(arr, 3);
+    assertEquals(336, result);
   }
+
+
 
   @Test
   public void whenGivenGridWithSizeEqualToLength_TreatWholeGridAsTheOnlySubgrid() throws Exception {
@@ -165,7 +236,7 @@ public class AppTest {
   }
 
   @Test
-  public void whenGivenTestDataProvidedInQuestionWithTenByTenGrid_ReturnComputedValue() throws Exception {
+  public void whenGivenTestDataProvidedInQuestionWithTenByTenGridLength3_ReturnComputedValue() throws Exception {
     int[][] arr = {{8, 2, 22, 97, 38, 15, 0, 40, 0, 75},
         {49, 49, 99, 40, 17, 81, 18, 57, 60, 87},
         {81, 49, 31, 73, 55, 79, 14, 29, 93, 71},
@@ -182,7 +253,7 @@ public class AppTest {
 
 
   @Test
-  public void whenGivenTestDataSufficentlyLargeWithTenByTenGrid_ReturnComputedValue() throws Exception {
+  public void whenGivenTestDataSufficentlyLargeWithTenByTenGridLength3_ReturnComputedValue() throws Exception {
     int[][] arr = {{558, 552, 5522, 5597, 5538, 5515, 0, 5540, 0, 5575},
         {5549, 5549, 5599, 5540, 5517, 5581, 5518, 5557, 5560, 5587},
         {5581, 5549, 5531, 5573, 5555, 5579, 5514, 5529, 5593, 5571},
@@ -195,6 +266,42 @@ public class AppTest {
         {5521, 5536, 5523, 559, 5575, 550, 5576, 5544, 5520, 5545}};
     long result = obj.getProduct(arr, 3);
     assertEquals(174519402255L, result);
+  }
+
+  @Test
+  public void whenGivenTestDataWithAsymmetricGridRows4Columns6Length3_ReturnComputedValue() throws Exception {
+    int[][] arr = {{8, 2, 22, 97, 38, 15},
+        {49, 49, 99, 40, 17, 81},
+        {81, 49, 31, 73, 55, 79},
+        {52, 70, 95, 23, 4, 60}};
+    long result = obj.getProduct(arr, 3);
+    assertEquals(470547, result);
+  }
+
+
+  @Test
+  public void whenGivenTestDataWithAsymmetricGridRows5Columns3Length2_ReturnComputedValue() throws Exception {
+    int[][] arr = {{8, 2, 22},
+                  {49, 49, 99},
+                  {81, 49, 31},
+                  {52, 70, 95},
+                  {22, 31, 16}};
+    long result = obj.getProduct(arr, 2);
+    assertEquals(6650, result);
+  }
+
+  @Test
+  public void whenGivenTestDataWith1Row6ColumnsLength2_ReturnComputedValue() throws Exception {
+    int[][] arr = {{1, 502, 97, 49, 986, 15}};
+    long result = obj.getProduct(arr, 2);
+    assertEquals(48694, result);
+  }
+
+  @Test
+  public void whenGivenTestDataWith6Rows1ColumnsLength2_ReturnComputedValue() throws Exception {
+    int[][] arr = {{1}, {502}, {97}, {49}, {986}, {15}};
+    long result = obj.getProduct(arr, 2);
+    assertEquals(48694, result);
   }
 
 }
