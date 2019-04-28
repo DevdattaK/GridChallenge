@@ -5,7 +5,7 @@
 
 * Method signatures provided were used as guidelines for implementation. For this reason, kept the return type as ``` long ``` and grid element type as ``` int ```, as provided in the problem statement. 
 * The term combination refers to mathematical combination i.e. order of elements do not matter and resulting collection is equivalent to Set<T>. This is also captured in 'Clarifications' section of the problem statement
-* ~~ Grid will always be symmetrical. i.e. KxK size. Any violation of this assumption will be handled as exception scenario. ~~
+* ~~Grid will always be symmetrical. i.e. KxK size. Any violation of this assumption will be handled as exception scenario.~~
 * If grid size (rows AND columns) is less than ```length```, we treat that as invalid input. Instead of throwing an exception, it is handled as 'return value that is not possible for combinations' i.e. -1.
 
 
